@@ -5,8 +5,10 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Use environment variable for MongoDB URL for Render deployment
-const mongoURL = process.env.MONGO_URL || "mongodb+srv://sena:%40Senaatim2005@cluster0.gyks1.mongodb.net/webstore";
+// Use an environment variable for MongoDB URL if available (set this in Render)
+const mongoURL =
+  process.env.MONGO_URL ||
+  "mongodb+srv://sena:%40Senaatim2005@cluster0.gyks1.mongodb.net/webstore";
 const dbName = "webstore";
 
 let lessonsCollection, ordersCollection;
@@ -26,7 +28,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from the "images" and "data" directories
+// Serve static files from the "public" folder,
+// and additionally serve files from "images" and "data" folders.
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/data", express.static(path.join(__dirname, "data")));
 
@@ -101,7 +105,7 @@ app.post("/orders", async (req, res) => {
   }
 });
 
-// PUT endpoint to update a lesson
+// PUT endpoint to update a lesson (product)
 app.put("/lessons/:id", async (req, res) => {
   const lessonId = req.params.id;
   const updatedLesson = req.body;
