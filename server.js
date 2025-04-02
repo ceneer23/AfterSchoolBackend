@@ -1,16 +1,17 @@
-// Save this as server.js
+// server.js
 const express = require("express");
 const { MongoClient, ObjectId } = require("mongodb");
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const mongoURL =
-  "mongodb+srv://sena:%40Senaatim2005@cluster0.gyks1.mongodb.net/webstore";
+// Use environment variable for MongoDB URL for Render deployment
+const mongoURL = process.env.MONGO_URL || "mongodb+srv://sena:%40Senaatim2005@cluster0.gyks1.mongodb.net/webstore";
 const dbName = "webstore";
 
 let lessonsCollection, ordersCollection;
 
+// Enable CORS
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
@@ -18,14 +19,21 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
+
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
-app.use(express.static(path.join(__dirname, "public")));
+
+// Serve static files from the "images" and "data" directories
+app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/data", express.static(path.join(__dirname, "data")));
+
 app.use(express.json());
 
-MongoClient.connect(mongoURL)
+// Connect to MongoDB
+MongoClient.connect(mongoURL, { useUnifiedTopology: true })
   .then((client) => {
     const db = client.db(dbName);
     lessonsCollection = db.collection("products");
@@ -39,6 +47,7 @@ MongoClient.connect(mongoURL)
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
+// GET endpoint to fetch lessons (products)
 app.get("/lessons", async (req, res) => {
   try {
     const lessons = await lessonsCollection.find().toArray();
@@ -48,6 +57,7 @@ app.get("/lessons", async (req, res) => {
   }
 });
 
+// POST endpoint to create orders
 app.post("/orders", async (req, res) => {
   const {
     firstName,
@@ -91,6 +101,7 @@ app.post("/orders", async (req, res) => {
   }
 });
 
+// PUT endpoint to update a lesson
 app.put("/lessons/:id", async (req, res) => {
   const lessonId = req.params.id;
   const updatedLesson = req.body;
