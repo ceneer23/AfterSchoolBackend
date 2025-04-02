@@ -105,7 +105,7 @@ app.post("/orders", async (req, res) => {
   }
 });
 
-// PUT endpoint to update   
+// PUT endpoint to    
 app.put("/lessons/:id", async (req, res) => {
   const lessonId = req.params.id;
   const updatedLesson = req.body;
